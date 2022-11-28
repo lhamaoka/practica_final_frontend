@@ -67,26 +67,33 @@ spec:
     }
 
     stage("4.- Build & Push") {
-        steps {
-          sh "echo Construcción de la imagen con Kaniko y subida de la misma a vuestro repositorio personal en Docker Hub"
-          script {
-            dockerImage = docker.build registryFrontend + ":$BUILD_NUMBER"
-            docker.withRegistry( '', registryCredential) {
-              dockerImage.push()
-            }
+      steps {
+        sh "echo Construcción de la imagen con Kaniko y subida de la misma a vuestro repositorio personal en Docker Hub"
+        script {
+          dockerImage = docker.build registryFrontend + ":$BUILD_NUMBER"
+          docker.withRegistry( '', registryCredential) {
+            dockerImage.push()
+          }
 
-            dockerImage = docker.build registryFrontend + ":latest"
-            docker.withRegistry( '', registryCredential) {
-              dockerImage.push()
-            }
+          dockerImage = docker.build registryFrontend + ":latest"
+          docker.withRegistry( '', registryCredential) {
+            dockerImage.push()
           }
         }
+      }
     }
 
     stage("5.- Run test environment") {
-        steps {
-            sh "echo Iniciar un pod o contenedor con la imagen que acabamos de generar"
+      steps {
+        sh "echo Iniciar un pod o contenedor con la imagen que acabamos de generar"
+        script {
+          if(fileExists("launcher")){
+            sh 'rm -r launcher'
+          }
         }
+        sh "git clone https://github.com/lhamaoka/manifest_launcher.git launcher"
+        sh "kubectl apply -f launcher/deploys/frontend/manifest.yaml --kubeconfig=launcher/config/config"
+      }
     }
 
     stage("6.- Selenium") {
