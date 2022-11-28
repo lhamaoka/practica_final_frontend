@@ -45,6 +45,19 @@ spec:
     stage("3.- Quality Tests") {
         steps {
             sh "echo Comprobación de la calidad del código con Sonarqube."
+            sh 'SonarQube analysis'
+            withSonarQubeEnv(credentialsId: "sonarqube-credentials", installationName: "sonarqube-server"){
+              sh 'npm run sonar'
+            }
+            sh 'Quality Gate'
+            timeout(time: 10, unit: "MINUTES") {
+              script {
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                }
+              }
+            }
         }
     }
 
