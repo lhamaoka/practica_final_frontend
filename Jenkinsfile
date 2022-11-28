@@ -38,6 +38,7 @@ spec:
     stage("2.- Build") {
         steps {
             sh "echo Consistirá en construir la aplicación Angular"
+            sh 'npm install && npm run build'
         }
     }
 
