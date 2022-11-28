@@ -28,6 +28,11 @@ spec:
       }
   }
 
+  environment {
+    registryCredential='dockerhub_credentials'
+    registryFrontend = 'lhamaoka/practica-final-frontend'
+  }
+
   stages {
     stage("1.- Prepare environment") {
         steps {
@@ -63,13 +68,24 @@ spec:
 
     stage("4.- Build & Push") {
         steps {
-            sh "echo Construcción de la imagen con Kaniko y subida de la misma a vuestro repositorio personal en Docker Hub"
+          sh "echo Construcción de la imagen con Kaniko y subida de la misma a vuestro repositorio personal en Docker Hub"
+          script {
+            dockerImage = docker.build registryFrontend + ":$BUILD_NUMBER"
+            docker.withRegistry( '', registryCredential) {
+              dockerImage.push()
+            }
+
+            dockerImage = docker.build registryFrontend + ":latest"
+            docker.withRegistry( '', registryCredential) {
+              dockerImage.push()
+            }
+          }
         }
     }
 
     stage("5.- Run test environment") {
         steps {
-            sh "echo Iniciar un pod o contenedor con la imagen con la imagen que acabamos de generar"
+            sh "echo Iniciar un pod o contenedor con la imagen que acabamos de generar"
         }
     }
 
