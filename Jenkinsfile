@@ -34,18 +34,18 @@ spec:
   }
 
   stages {
-    stage("1.- Prepare environment") {
-        steps {
-            sh "node -v"
-        }
-    }
+    // stage("1.- Prepare environment") {
+    //     steps {
+    //         sh "node -v"
+    //     }
+    // }
 
-    stage("2.- Build") {
-        steps {
-            sh "echo Consistirá en construir la aplicación Angular"
-            sh 'npm install && npm run build'
-        }
-    }
+    // stage("2.- Build") {
+    //     steps {
+    //         sh "echo Consistirá en construir la aplicación Angular"
+    //         sh 'npm install && npm run build'
+    //     }
+    // }
 
     // stage("3.- Quality Tests") {
     //     steps {
@@ -66,22 +66,22 @@ spec:
     //     }
     // }
 
-    stage("4.- Build & Push") {
-      steps {
-        sh "echo Construcción de la imagen con Kaniko y subida de la misma a vuestro repositorio personal en Docker Hub"
-        script {
-          dockerImage = docker.build registryFrontend + ":$BUILD_NUMBER"
-          docker.withRegistry( '', registryCredential) {
-            dockerImage.push()
-          }
+    // stage("4.- Build & Push") {
+    //   steps {
+    //     sh "echo Construcción de la imagen con Kaniko y subida de la misma a vuestro repositorio personal en Docker Hub"
+    //     script {
+    //       dockerImage = docker.build registryFrontend + ":$BUILD_NUMBER"
+    //       docker.withRegistry( '', registryCredential) {
+    //         dockerImage.push()
+    //       }
 
-          dockerImage = docker.build registryFrontend + ":latest"
-          docker.withRegistry( '', registryCredential) {
-            dockerImage.push()
-          }
-        }
-      }
-    }
+    //       dockerImage = docker.build registryFrontend + ":latest"
+    //       docker.withRegistry( '', registryCredential) {
+    //         dockerImage.push()
+    //       }
+    //     }
+    //   }
+    // }
 
     stage("5.- Run test environment") {
       steps {
