@@ -61,7 +61,7 @@ spec:
               sh 'npm run sonar'
             }
             sh 'Quality Gate'
-            timeout(time: 10, unit: "MINUTES") {
+            timeout(time: 1, unit: "MINUTES") {
               script {
                 def qg = waitForQualityGate()
                 if (qg.status != 'OK') {
