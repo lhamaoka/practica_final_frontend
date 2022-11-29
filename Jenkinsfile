@@ -14,6 +14,13 @@ spec:
       name: docker-socket-volume
     securityContext:
       privileged: true
+  - name: nodo-java
+    image: lhamaoka/nodo-java-practica-final:1.0
+    volumeMounts:
+    - mountPath: /var/run/docker.sock
+      name: docker-socket-volume
+    securityContext:
+      privileged: true
   volumes:
   - name: docker-socket-volume
     hostPath:
@@ -98,21 +105,23 @@ spec:
 
     stage("6.- Selenium") {
         steps {
-          sh "echo Lanzar los funcionales e2e sobre el frontend desplegado"
-          sh 'echo Run function testing E2E'
-          sh 'mvn clean verify -Dwebdriver.remote.url=https://9f17-148-3-112-184.eu.ngrok.io/wd/hub -Dwebdriver.remote.driver=chrome -Dchrome.switches="--no-sandbox,--ignore-certificate-errors,--homepage=about:blank,--no-first-run,--headless"'
+          container('nodo-java'){
+            sh "echo Lanzar los funcionales e2e sobre el frontend desplegado"
+            sh 'echo Run function testing E2E'
+            sh 'mvn clean verify -Dwebdriver.remote.url=https://9f17-148-3-112-184.eu.ngrok.io/wd/hub -Dwebdriver.remote.driver=chrome -Dchrome.switches="--no-sandbox,--ignore-certificate-errors,--homepage=about:blank,--no-first-run,--headless"'
 
-          sh 'echo Generate Cucumber Report'
-          sh 'mvn serenity:aggregate'
+            sh 'echo Generate Cucumber Report'
+            sh 'mvn serenity:aggregate'
 
-          publishHTML(target: [
-              reportName : 'Serenity',
-              reportDir:   'target/site/serenity',
-              reportFiles: 'index.html',
-              keepAll:     true,
-              alwaysLinkToLastBuild: true,
-              allowMissing: false
-          ])
+            publishHTML(target: [
+                reportName : 'Serenity',
+                reportDir:   'target/site/serenity',
+                reportFiles: 'index.html',
+                keepAll:     true,
+                alwaysLinkToLastBuild: true,
+                allowMissing: false
+            ])
+          }
         }
     }
   }
