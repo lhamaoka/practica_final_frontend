@@ -102,27 +102,27 @@ spec:
       }
     }
 
-    // stage("6.- Selenium") {
-    //     steps {
-    //       container('nodo-java'){
-    //         sh "echo Lanzar los funcionales e2e sobre el frontend desplegado"
-    //         sh 'echo Run function testing E2E'
-    //         sh 'mvn clean verify -Dwebdriver.remote.url=https://daita-selenium.loca.lt/wd/hub -Dwebdriver.remote.driver=chrome -Dchrome.switches="--no-sandbox,--ignore-certificate-errors,--homepage=about:blank,--no-first-run,--headless"'
+    stage("6.- Selenium") {
+        steps {
+          container('nodo-java'){
+            sh "echo Lanzar los funcionales e2e sobre el frontend desplegado"
+            sh 'echo Run function testing E2E'
+            sh 'mvn clean verify -Dwebdriver.remote.url=https://daita-selenium.loca.lt/wd/hub -Dwebdriver.remote.driver=chrome -Dchrome.switches="--no-sandbox,--ignore-certificate-errors,--homepage=about:blank,--no-first-run,--headless"'
 
-    //         sh 'echo Generate Cucumber Report'
-    //         sh 'mvn serenity:aggregate'
+            sh 'echo Generate Cucumber Report'
+            sh 'mvn serenity:aggregate'
 
-    //         publishHTML(target: [
-    //             reportName : 'Serenity',
-    //             reportDir:   'target/site/serenity',
-    //             reportFiles: 'index.html',
-    //             keepAll:     true,
-    //             alwaysLinkToLastBuild: true,
-    //             allowMissing: false
-    //         ])
-    //       }
-    //     }
-    // }
+            publishHTML(target: [
+                reportName : 'Serenity',
+                reportDir:   'target/site/serenity',
+                reportFiles: 'index.html',
+                keepAll:     true,
+                alwaysLinkToLastBuild: true,
+                allowMissing: false
+            ])
+          }
+        }
+    }
   }
 
   post {
