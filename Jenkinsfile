@@ -14,6 +14,12 @@ spec:
       name: docker-socket-volume
     securityContext:
       privileged: true
+  - name: nodo-java
+    image: lhamaoka/nodo-java-practica-final:1.0
+    command:
+    - cat
+    imagePullPolicy: IfNotPresent
+    tty: true
   volumes:
   - name: docker-socket-volume
     hostPath:
@@ -34,54 +40,54 @@ spec:
   }
 
   stages {
-    // stage("1.- Prepare environment") {
-    //     steps {
-    //         sh "node -v"
-    //     }
-    // }
+    stage("1.- Prepare environment") {
+        steps {
+            sh "node -v"
+        }
+    }
 
-    // stage("2.- Build") {
-    //     steps {
-    //         sh "echo Consistirá en construir la aplicación Angular"
-    //         sh 'npm install && npm run build'
-    //     }
-    // }
+    stage("2.- Build") {
+        steps {
+            sh "echo Consistirá en construir la aplicación Angular"
+            sh 'npm install && npm run build'
+        }
+    }
 
-    // stage("3.- Quality Tests") {
-    //     steps {
-    //         sh "echo Comprobación de la calidad del código con Sonarqube."
-    //         sh 'SonarQube analysis'
-    //         withSonarQubeEnv(credentialsId: "sonarqube-credentials", installationName: "sonarqube-server"){
-    //           sh 'npm run sonar'
-    //         }
-    //         sh 'Quality Gate'
-    //         timeout(time: 10, unit: "MINUTES") {
-    //           script {
-    //             def qg = waitForQualityGate()
-    //             if (qg.status != 'OK') {
-    //               error "Pipeline aborted due to quality gate failure: ${qg.status}"
-    //             }
-    //           }
-    //         }
-    //     }
-    // }
+    stage("3.- Quality Tests") {
+        steps {
+            sh "echo Comprobación de la calidad del código con Sonarqube."
+            sh 'echo SonarQube analysis'
+            withSonarQubeEnv(credentialsId: "sonarqube-credentials", installationName: "sonarqube-server"){
+              sh 'npm run sonar'
+            }
+            sh 'echo Quality Gate'
+            timeout(time: 1, unit: "MINUTES") {
+              script {
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                }
+              }
+            }
+        }
+    }
 
-    // stage("4.- Build & Push") {
-    //   steps {
-    //     sh "echo Construcción de la imagen con Kaniko y subida de la misma a vuestro repositorio personal en Docker Hub"
-    //     script {
-    //       dockerImage = docker.build registryFrontend + ":$BUILD_NUMBER"
-    //       docker.withRegistry( '', registryCredential) {
-    //         dockerImage.push()
-    //       }
+    stage("4.- Build & Push") {
+      steps {
+        sh "echo Construcción de la imagen con Kaniko y subida de la misma a vuestro repositorio personal en Docker Hub"
+        script {
+          dockerImage = docker.build registryFrontend + ":$BUILD_NUMBER"
+          docker.withRegistry( '', registryCredential) {
+            dockerImage.push()
+          }
 
-    //       dockerImage = docker.build registryFrontend + ":latest"
-    //       docker.withRegistry( '', registryCredential) {
-    //         dockerImage.push()
-    //       }
-    //     }
-    //   }
-    // }
+          dockerImage = docker.build registryFrontend + ":latest"
+          docker.withRegistry( '', registryCredential) {
+            dockerImage.push()
+          }
+        }
+      }
+    }
 
     stage("5.- Run test environment") {
       steps {
@@ -98,7 +104,23 @@ spec:
 
     stage("6.- Selenium") {
         steps {
+          container('nodo-java'){
             sh "echo Lanzar los funcionales e2e sobre el frontend desplegado"
+            sh 'echo Run function testing E2E'
+            sh 'mvn clean verify -Dwebdriver.remote.url=https://daita-selenium.loca.lt/wd/hub -Dwebdriver.remote.driver=chrome -Dchrome.switches="--no-sandbox,--ignore-certificate-errors,--homepage=about:blank,--no-first-run,--headless"'
+
+            sh 'echo Generate Cucumber Report'
+            sh 'mvn serenity:aggregate'
+
+            publishHTML(target: [
+                reportName : 'Serenity',
+                reportDir:   'target/site/serenity',
+                reportFiles: 'index.html',
+                keepAll:     true,
+                alwaysLinkToLastBuild: true,
+                allowMissing: false
+            ])
+          }
         }
     }
   }
