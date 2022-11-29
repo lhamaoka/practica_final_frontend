@@ -56,11 +56,11 @@ spec:
     stage("3.- Quality Tests") {
         steps {
             sh "echo Comprobación de la calidad del código con Sonarqube."
-            sh 'SonarQube analysis'
+            sh 'echo SonarQube analysis'
             withSonarQubeEnv(credentialsId: "sonarqube-credentials", installationName: "sonarqube-server"){
               sh 'npm run sonar'
             }
-            sh 'Quality Gate'
+            sh 'echo Quality Gate'
             timeout(time: 1, unit: "MINUTES") {
               script {
                 def qg = waitForQualityGate()
