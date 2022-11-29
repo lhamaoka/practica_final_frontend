@@ -16,11 +16,10 @@ spec:
       privileged: true
   - name: nodo-java
     image: lhamaoka/nodo-java-practica-final:1.0
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-socket-volume
-    securityContext:
-      privileged: true
+    command:
+    - cat
+    imagePullPolicy: IfNotPresent
+    tty: true
   volumes:
   - name: docker-socket-volume
     hostPath:
