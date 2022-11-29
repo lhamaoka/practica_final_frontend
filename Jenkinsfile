@@ -127,6 +127,7 @@ spec:
 
   post {
     always {
+      cleanWs()
       sh 'docker logout'
     }
   }
